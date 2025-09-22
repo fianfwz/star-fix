@@ -1,42 +1,66 @@
 import React, { useEffect, useState } from 'react';
+import DetailPsetModal from './DetailPsetModal'; // Import modal
 
 export default function ModalEditPset({
   isOpen,
   onClose,
   currentPset,
   psetList = [],
-  onSave,
-  onShowDetail
+  onSave
 }) {
   const [selectedPsetId, setSelectedPsetId] = useState(currentPset?.PSET_ID || '');
+  const [detailPsetModal, setDetailPsetModal] = useState({ isOpen: false, data: [], title: '' });
 
   useEffect(() => {
     setSelectedPsetId(currentPset?.PSET_ID || '');
   }, [currentPset]);
 
   if (!isOpen || !currentPset) return null;
+  
+  const handleShowDetail = async () => {
+    // Diasumsikan ada fungsi di parent atau API untuk memuat detail.
+    // Untuk contoh ini, kita akan menggunakan data dummy.
+    const dummyData = [
+      {
+        PSET_ID: selectedPsetId,
+        INSURED_PERIOD_MONTH: 12,
+        MIN_UP: 10000000,
+        MAX_UP: 500000000,
+        MIN_PREMIUM: 100000,
+        MAX_PREMIUM: 5000000,
+        LKU_ID: 1 // Contoh: IDR
+      }
+    ];
+
+    setDetailPsetModal({
+      isOpen: true,
+      data: dummyData,
+      title: `Detail PSET ${selectedPsetId}`
+    });
+  };
 
   return (
+    // Layer pertama (ModalEditPset) dengan z-index 50
     <div
       className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 rounded-2xl p-6 w-[90%] max-w-lg shadow-2xl border border-orange-200"
+        className="bg-white rounded-2xl p-6 w-[90%] max-w-lg shadow-xl border border-gray-200"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">
+        <h3 className="text-xl font-bold text-gray-800">
           ✏️ Ubah PSET_ID
         </h3>
-        <p className="text-sm mt-2 text-orange-700">
+        <p className="text-sm mt-2 text-gray-600">
           Ubah PSET_ID <span className="font-semibold">{currentPset.PSET_ID}</span> ke:
         </p>
 
         <select
           value={selectedPsetId}
           onChange={(e) => setSelectedPsetId(e.target.value)}
-          className="mt-4 w-full border-2 border-orange-300 focus:border-pink-400 rounded-xl p-3 text-sm 
-                     bg-gradient-to-r from-yellow-50 to-orange-50 focus:shadow-lg transition-all duration-300"
+          className="mt-4 w-full border border-gray-300 focus:border-blue-400 rounded-lg p-3 text-sm 
+                     bg-white focus:shadow-md transition-all duration-200"
         >
           <option value="">-- Pilih PSET_ID --</option>
           {psetList.map((pset) => (
@@ -49,22 +73,15 @@ export default function ModalEditPset({
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-slate-200 text-slate-700 font-medium 
-                       hover:bg-slate-300 transition-all duration-200"
+            className="px-5 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium 
+                       hover:bg-gray-200 transition-all duration-200"
           >
             ❌ Batal
           </button>
           <button
-            onClick={() =>
-              onShowDetail({
-                PSET_ID: selectedPsetId,
-                LSBS_ID: currentPset.LSBS_ID,
-                LSDBS_NUMBER: currentPset.LSDBS_NUMBER,
-              })
-            }
-            className="px-5 py-2 rounded-xl bg-gradient-to-r from-pink-400 to-orange-400 
-                       text-white font-semibold shadow-md hover:from-pink-500 hover:to-orange-500 
-                       transform hover:scale-105 transition-all duration-200"
+            onClick={handleShowDetail}
+            className="px-5 py-2 rounded-lg bg-blue-500 text-white font-semibold 
+                       shadow-sm hover:bg-blue-600 transition-all duration-200"
           >
             🔍 Detail
           </button>
@@ -72,14 +89,23 @@ export default function ModalEditPset({
             onClick={() => {
               onSave(selectedPsetId);
             }}
-            className="px-5 py-2 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-400 
-                       text-white font-semibold shadow-md hover:from-yellow-500 hover:to-orange-500 
-                       transform hover:scale-105 transition-all duration-200"
+            className="px-5 py-2 rounded-lg bg-green-500 text-white font-semibold 
+                       shadow-sm hover:bg-green-600 transition-all duration-200"
           >
             💾 Simpan
           </button>
         </div>
       </div>
+      
+      {/* Layer kedua (DetailPsetModal) dengan z-index 60, berada di atas modal induk */}
+      <DetailPsetModal 
+        isOpen={detailPsetModal.isOpen} 
+        onClose={() => setDetailPsetModal({ isOpen: false, data: [], title: '' })} 
+        data={detailPsetModal.data} 
+        title={detailPsetModal.title} 
+        // Menggunakan z-index lebih tinggi agar tampil di atas
+        className="z-[60]"
+      />
     </div>
   );
 }
