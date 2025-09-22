@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Eye,
   EyeOff,
@@ -24,6 +24,14 @@ const Login = ({ onLogin }) => {
     rememberMe: false,
   });
 
+  // ✅ Cek apakah sudah login & rememberMe
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    if (isLoggedIn) {
+      window.location.href = "/products"; // langsung ke products
+    }
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
@@ -34,7 +42,6 @@ const Login = ({ onLogin }) => {
   };
 
   const performLogin = async (username, password) => {
-    // Try different payload formats that might be expected by the API
     const payloadVariants = [
       { Username: username, password: password },
       { username: username, password: password },
@@ -43,13 +50,8 @@ const Login = ({ onLogin }) => {
       { login: username, password: password }
     ];
 
-    console.log("[login] Trying login with username:", username);
-
-    // Try each payload variant
     for (let i = 0; i < payloadVariants.length; i++) {
       const payload = payloadVariants[i];
-      console.log(`[login] Attempt ${i + 1} with payload:`, payload);
-
       try {
         const response = await fetch(API_URL, {
           method: "POST",
@@ -61,84 +63,49 @@ const Login = ({ onLogin }) => {
           body: JSON.stringify(payload),
         });
 
-        console.log(`[login] Attempt ${i + 1} HTTP status:`, response.status, response.statusText);
-        console.log(`[login] Response headers:`, Object.fromEntries(response.headers));
-
         const rawText = await response.text();
-        console.log(`[login] Attempt ${i + 1} Raw response:`, rawText);
-
         let parsed = {};
         try {
           parsed = rawText ? JSON.parse(rawText) : {};
-        } catch (parseError) {
-          console.log(`[login] Attempt ${i + 1} JSON parse failed:`, parseError);
+        } catch {
           parsed = { __raw: rawText };
         }
 
-        console.log(`[login] Attempt ${i + 1} Parsed response:`, parsed);
-
-        // If this attempt was successful, return the result
         if (response.ok || response.status === 200) {
-          console.log(`[login] SUCCESS with payload variant ${i + 1}:`, payload);
           return parsed;
         }
 
-        // If we get a different error (not 401), it might indicate the payload format is correct
-        // but credentials are wrong, so don't try other variants
         if (response.status !== 401) {
-          const errorMessage = parsed.message || 
-                              parsed.error || 
-                              parsed.detail ||
-                              rawText || 
-                              `HTTP ${response.status}`;
+          const errorMessage = parsed.message || parsed.error || parsed.detail || rawText || `HTTP ${response.status}`;
           throw new Error(errorMessage);
         }
-
-        // Continue to next variant if 401
-        console.log(`[login] Attempt ${i + 1} failed with 401, trying next variant...`);
-        
       } catch (fetchError) {
-        console.log(`[login] Attempt ${i + 1} fetch error:`, fetchError);
         if (i === payloadVariants.length - 1) {
           throw fetchError;
         }
       }
     }
 
-    // If all variants failed with 401
-    throw new Error("Username atau password salah (semua format payload gagal)");
+    throw new Error("Username atau password salah");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Basic validation
+
     if (!formData.username.trim()) {
-      setFormState((p) => ({
-        ...p,
-        error: "Username harus diisi",
-      }));
+      setFormState((p) => ({ ...p, error: "Username harus diisi" }));
       return;
     }
 
     if (!formData.password.trim()) {
-      setFormState((p) => ({
-        ...p,
-        error: "Password harus diisi",
-      }));
+      setFormState((p) => ({ ...p, error: "Password harus diisi" }));
       return;
     }
 
-    setFormState((p) => ({
-      ...p,
-      error: "",
-      success: "",
-      loading: true,
-    }));
+    setFormState((p) => ({ ...p, error: "", success: "", loading: true }));
 
     try {
       const result = await performLogin(formData.username, formData.password);
-      console.log("[login] Final result:", result);
 
       setFormState((p) => ({
         ...p,
@@ -146,10 +113,20 @@ const Login = ({ onLogin }) => {
         loading: false,
       }));
 
+      // ✅ Simpan login di localStorage
+      localStorage.setItem("isLoggedIn", "true");
+
+      // ✅ Jika rememberMe dicentang, simpan juga username
+      if (formState.rememberMe) {
+        localStorage.setItem("rememberedUsername", formData.username);
+      } else {
+        localStorage.removeItem("rememberedUsername");
+      }
+
       setTimeout(() => {
         if (onLogin) onLogin(result);
         else window.location.href = "/products";
-      }, 1000);
+      }, 500);
     } catch (error) {
       setFormState((p) => ({
         ...p,
@@ -158,6 +135,15 @@ const Login = ({ onLogin }) => {
       }));
     }
   };
+
+  // ✅ Isi username dari rememberedUsername jika ada
+  useEffect(() => {
+    const rememberedUsername = localStorage.getItem("rememberedUsername");
+    if (rememberedUsername) {
+      setFormData((p) => ({ ...p, username: rememberedUsername }));
+      setFormState((p) => ({ ...p, rememberMe: true }));
+    }
+  }, []);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center min-h-screen p-4 bg-gray-50">
@@ -224,10 +210,7 @@ const Login = ({ onLogin }) => {
               <button
                 type="button"
                 onClick={() =>
-                  setFormState((p) => ({
-                    ...p,
-                    showPassword: !p.showPassword,
-                  }))
+                  setFormState((p) => ({ ...p, showPassword: !p.showPassword }))
                 }
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 disabled={formState.loading}
