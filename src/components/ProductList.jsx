@@ -13,6 +13,45 @@ import ModalFormula from './ModalFormula';
 import InfoModal from './InfoModal';
 import DetailPsetModal from './DetailPsetModal';
 import ModalEditPset from './ModalEditPset';
+import LogoutButton from './LogoutButton';
+
+// Hook untuk dark mode
+// Hook untuk dark mode
+const useDarkMode = () => {
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      // Prioritaskan localStorage, fallback ke preferensi sistem
+      const saved = localStorage.getItem('darkMode');
+     return saved === 'true';
+    }
+    return false;
+  });
+  // Effect tambahan untuk memastikan class diterapkan saat mount
+  useEffect(() => {
+    localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+    
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
+
+  const toggleDarkMode = () => setIsDark(!isDark);
+
+  return { isDark, toggleDarkMode };
+};
+
+// DarkModeToggle Component
+const DarkModeToggle = ({ isDark, toggleDarkMode }) => (
+  <button
+    onClick={toggleDarkMode}
+    className="p-1.5 sm:p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
+    aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+  >
+    {isDark ? '☀️' : '🌙'}
+  </button>
+);
 
 function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber }) {
   const [data, setData] = useState([]);
@@ -50,45 +89,43 @@ function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber }) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl p-4 sm:p-6 w-full max-w-[95vw] sm:max-w-3xl shadow-xl border border-gray-200 max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 w-full max-w-[95vw] sm:max-w-3xl shadow-xl border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+        <h3 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
           {title || "Daftar Rider"}
         </h3>
-        <div className="overflow-x-auto max-h-[50vh] sm:max-h-[60vh] border border-gray-200 rounded-md">
+        <div className="max-h-[50vh] sm:max-h-[60vh] border border-gray-200 dark:border-gray-700 rounded-md overflow-y-auto">
           {!showRiderList ? (
-            <p className="p-4 text-center text-gray-500">TIDAK ADA RIDER</p>
+            <p className="p-4 text-center text-gray-500 dark:text-gray-400">TIDAK ADA RIDER</p>
           ) : loading ? (
-            <p className="p-4 text-center text-gray-600">⏳ Memuat data...</p>
+            <p className="p-4 text-center text-gray-600 dark:text-gray-300">⏳ Memuat data...</p>
           ) : error ? (
-            <p className="p-4 text-center text-red-600 text-sm">❌ {error}</p>
+            <p className="p-4 text-center text-red-600 dark:text-red-400 text-sm">❌ {error}</p>
           ) : data.length === 0 ? (
-            <p className="p-4 text-center text-gray-500">Tidak ada data rider.</p>
+            <p className="p-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data rider.</p>
           ) : (
-            <table className="min-w-full text-sm border-collapse">
-              <thead className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white">
-                <tr>
-                  <th className="px-2 sm:px-3 py-2 text-left font-semibold text-xs sm:text-sm">NAMA RIDER</th>
-                </tr>
-              </thead>
-              <tbody>
+            <div className="w-full">
+              <div className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white p-3 font-semibold text-xs sm:text-sm">
+                NAMA RIDER
+              </div>
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {data.map((item, idx) => (
-                  <tr
+                  <div
                     key={idx}
-                    className="border-b last:border-b-0 hover:bg-gray-50 transition"
+                    className="p-3 text-gray-800 dark:text-gray-200 text-xs sm:text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                   >
-                    <td className="px-2 sm:px-3 py-2 text-gray-800 text-xs sm:text-sm">{item.NAMA_RIDER || "-"}</td>
-                  </tr>
+                    {item.NAMA_RIDER || "-"}
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           )}
         </div>
         <div className="mt-4 sm:mt-6 text-right">
           <button
             onClick={onClose}
-            className="px-3 sm:px-4 py-2 rounded-md bg-gray-700 text-white font-medium hover:bg-gray-800 transition text-sm"
+            className="px-3 sm:px-4 py-2 rounded-md bg-gray-700 dark:bg-gray-600 text-white font-medium hover:bg-gray-800 dark:hover:bg-gray-700 transition text-sm"
           >
             Tutup
           </button>
@@ -134,35 +171,31 @@ function TenagaPemasar({ lsbsId, lsdbsNumber }) {
   }, [lsbsId, lsdbsNumber]);
 
   return (
-    <div className="mt-4 sm:mt-6">
-      <h4 className="text-sm sm:text-md font-semibold text-gray-800 mb-2 sm:mb-3">👨‍💼 Tenaga Pemasar</h4>
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+    <div>
+      <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2 sm:mb-3">👨‍💼 Tenaga Pemasar</h4>
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
         {Number(lsbsId) !== 213 || Number(lsdbsNumber) !== 3 ? (
-          <div className="p-3 text-xs sm:text-sm text-gray-500">
+          <div className="p-3 sm:p-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
             Tidak ada data tenaga pemasar untuk produk ini
           </div>
         ) : loading ? (
-          <div className="p-3 text-xs sm:text-sm text-gray-600">⏳ Memuat daftar tenaga pemasar...</div>
+          <div className="p-3 sm:p-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300">⏳ Memuat daftar tenaga pemasar...</div>
         ) : error ? (
-          <div className="p-3 text-xs sm:text-sm text-red-600">❌ {error}</div>
+          <div className="p-3 sm:p-4 text-xs sm:text-sm text-red-600 dark:text-red-400">❌ {error}</div>
         ) : data.length === 0 ? (
-          <div className="p-3 text-xs sm:text-sm text-gray-500">Tidak ada data tenaga pemasar.</div>
+          <div className="p-3 sm:p-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">Tidak ada data tenaga pemasar.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-xs sm:text-sm">
-              <thead className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white">
-                <tr>
-                  <th className="px-2 sm:px-4 py-2 text-center">Nama Pemasar</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((row, idx) => (
-                  <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-2 sm:px-4 py-2 font-medium text-center">{row.TENAGA_PEMASAR || '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div>
+            <div className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white p-2 sm:p-3 font-semibold text-xs sm:text-sm text-center">
+              Nama Pemasar
+            </div>
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+              {data.map((row, idx) => (
+                <div key={idx} className={`p-2 sm:p-3 text-xs sm:text-sm font-medium text-center text-gray-800 dark:text-gray-200 ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'}`}>
+                  {row.TENAGA_PEMASAR || '-'}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -187,6 +220,9 @@ export default function ProductList() {
   const [detailPsetModal, setDetailPsetModal] = useState({ isOpen: false, data: [], title: '' });
 
   const [isRiderModalOpen, setIsRiderModalOpen] = useState(false);
+
+  // Dark mode hook
+  const { isDark, toggleDarkMode } = useDarkMode();
 
   useEffect(() => {
     let mounted = true;
@@ -264,7 +300,6 @@ export default function ProductList() {
       setLoadingDetail(false);
     }
   }, []);
-
   const handleRowClick = useCallback(async (prod) => {
     setSelectedProduct(prod);
     await loadDetailForPset(prod);
@@ -339,198 +374,388 @@ export default function ProductList() {
   }, [productOptions, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-2 sm:p-4 lg:p-6">
-      <div className="flex flex-col xl:flex-row gap-3 sm:gap-4 lg:gap-6">
-        {/* Left panel */}
-        <div className="w-full xl:w-[36%] bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 shadow-md border border-gray-200">
-          <div className="flex items-center justify-between mb-3 sm:mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-800">List Produk</h2>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      <div className="container mx-auto p-2 sm:p-4 lg:p-6">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 lg:gap-6">
+          
+          {/* Left panel */}
+          <div className="xl:col-span-5 2xl:col-span-4 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 shadow-md border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <div className="flex flex-col gap-2 mb-3 sm:mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 dark:text-gray-200">List Produk</h2>
+                  <DarkModeToggle isDark={isDark} toggleDarkMode={toggleDarkMode} />
+                </div>
+                <LogoutButton />
+              </div>
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari produk atau kode..."
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 mb-3 sm:mb-4 text-xs sm:text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-colors duration-200"
+            />
             {loadingList && (
-              <span className="px-2 sm:px-3 py-1 text-xs text-blue-700 bg-blue-100 rounded-full animate-pulse">
-                Memuat...
-              </span>
+              <div className="text-center py-4 text-blue-700 dark:text-blue-400">
+                <span className="px-2 py-1 text-xs text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 rounded-full animate-pulse">
+                  Memuat...
+                </span>
+              </div>
             )}
-          </div>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari produk atau kode..."
-            className="w-full border border-gray-300 rounded-lg p-2 mb-3 sm:mb-4 text-xs sm:text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          />
-          <div className="max-h-[40vh] sm:max-h-[50vh] lg:max-h-[60vh] overflow-auto border rounded-lg">
-            <table className="min-w-full text-xs sm:text-sm">
-              <thead className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white sticky top-0">
-                <tr>
-                  <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left">LSBS_ID</th>
-                  <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left">LSDBS_NUMBER</th>
-                  <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left">LSDBS_NAME</th>
-                  <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left">PSET_ID</th>
-                </tr>
-              </thead>
-              <tbody>
+            <div className="max-h-[40vh] sm:max-h-[50vh] lg:max-h-[65vh] 2xl:max-h-[70vh] overflow-y-auto border rounded-lg border-gray-200 dark:border-gray-700">
+              {/* Mobile Card View */}
+              <div className="block sm:hidden">
                 {filteredProducts.map((p, index) => (
-                  <tr
+                  <div
                     key={`${p.LSBS_ID}-${p.LSDBS_NUMBER}`}
                     onClick={() => handleRowClick(p)}
-                    className={`cursor-pointer hover:bg-blue-200 transition ${
+                    className={`p-3 cursor-pointer border-b last:border-b-0 border-gray-200 dark:border-gray-700 hover:bg-blue-100 dark:hover:bg-blue-900 transition ${
                       p.LSDBS_AKTIF === 0 
-                        ? 'bg-pink-100' 
-                        : index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                        ? 'bg-pink-100 dark:bg-pink-900' 
+                        : index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'
                     }`}
                   >
-                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2">{p.LSBS_ID}</td>
-                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2">{p.LSDBS_NUMBER}</td>
-                    <td className={`px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 font-medium ${p.LSDBS_AKTIF === 0 ? 'text-pink-700' : 'text-gray-800'}`}>
-                      <div className="break-words">
-                        {p.LSDBS_NAME}
-                        {p.LSDBS_AKTIF === 0 && <span className="ml-1 sm:ml-2 text-xs text-pink-600 font-semibold">(NON-AKTIF)</span>}
+                    <div className="space-y-1 text-xs">
+                      <div className="flex justify-between items-start">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">ID:</span>
+                        <span className="text-gray-900 dark:text-gray-100">{p.LSBS_ID}</span>
                       </div>
-                    </td>
-                    <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2">
-                        <span className={p.LSDBS_AKTIF === 0 ? 'text-pink-700' : 'text-gray-700'}>
+                      <div className="flex justify-between items-start">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">Number:</span>
+                        <span className="text-gray-900 dark:text-gray-100">{p.LSDBS_NUMBER}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">Name:</span>
+                        <div className={`text-xs ${p.LSDBS_AKTIF === 0 ? 'text-pink-700 dark:text-pink-300' : 'text-gray-800 dark:text-gray-200'}`}>
+                          {p.LSDBS_NAME}
+                          {p.LSDBS_AKTIF === 0 && <span className="ml-1 text-pink-600 dark:text-pink-400 font-semibold">(NON-AKTIF)</span>}
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">PSET_ID:</span>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className={`text-xs ${p.LSDBS_AKTIF === 0 ? 'text-pink-700 dark:text-pink-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                            {Array.isArray(p.PSET_ID) ? p.PSET_ID.join(', ') : (p.PSET_ID ?? '-')}
+                          </span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleEditPset(p); }}
+                            className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs underline"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden sm:block w-full">
+                <div className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white sticky top-0 grid grid-cols-12 gap-1 p-2 text-xs font-semibold">
+                  <div className="col-span-2">ID</div>
+                  <div className="col-span-2">NUM</div>
+                  <div className="col-span-5">NAME</div>
+                  <div className="col-span-3">PSET_ID</div>
+                </div>
+                <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {filteredProducts.map((p, index) => (
+                    <div
+                      key={`${p.LSBS_ID}-${p.LSDBS_NUMBER}`}
+                      onClick={() => handleRowClick(p)}
+                      className={`grid grid-cols-12 gap-1 p-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition text-xs ${
+                        p.LSDBS_AKTIF === 0 
+                          ? 'bg-pink-100 dark:bg-pink-900' 
+                          : index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'
+                      }`}
+                    >
+                      <div className="col-span-2 text-gray-900 dark:text-gray-100 truncate" title={p.LSBS_ID}>
+                        {p.LSBS_ID}
+                      </div>
+                      <div className="col-span-2 text-gray-900 dark:text-gray-100 truncate" title={p.LSDBS_NUMBER}>
+                        {p.LSDBS_NUMBER}
+                      </div>
+                      <div className={`col-span-5 font-medium ${p.LSDBS_AKTIF === 0 ? 'text-pink-700 dark:text-pink-300' : 'text-gray-800 dark:text-gray-200'}`}>
+                        <div className="break-words leading-tight">
+                          {p.LSDBS_NAME}
+                          {p.LSDBS_AKTIF === 0 && <span className="ml-1 text-pink-600 dark:text-pink-400 font-semibold">(NON-AKTIF)</span>}
+                        </div>
+                      </div>
+                      <div className="col-span-3 space-y-1">
+                        <div className={`truncate ${p.LSDBS_AKTIF === 0 ? 'text-pink-700 dark:text-pink-300' : 'text-gray-700 dark:text-gray-300'}`} title={Array.isArray(p.PSET_ID) ? p.PSET_ID.join(', ') : (p.PSET_ID ?? '-')}>
                           {Array.isArray(p.PSET_ID) ? p.PSET_ID.join(', ') : (p.PSET_ID ?? '-')}
-                        </span>
+                        </div>
                         <button
                           onClick={(e) => { e.stopPropagation(); handleEditPset(p); }}
-                          className="text-blue-500 hover:text-blue-700 text-xs underline whitespace-nowrap"
+                          className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
                         >
                           Edit
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredProducts.length === 0 && !loadingList && (
-              <div className="p-4 sm:p-6 text-center text-gray-500 text-sm">Tidak ada produk ditemukan</div>
-            )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {filteredProducts.length === 0 && !loadingList && (
+                <div className="p-4 sm:p-6 text-center text-gray-500 dark:text-gray-400 text-sm">Tidak ada produk ditemukan</div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Right panel */}
-        <div className="w-full xl:flex-1 bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 shadow-md border border-gray-200">
-          {loadingDetail && (
-            <div className="text-center py-8 sm:py-12 text-gray-500 text-sm sm:text-base">⏳ Memuat detail produk...</div>
-          )}
-
-          {!selectedProduct && !loadingDetail && (
-            <div className="text-center py-12 sm:py-16 text-gray-500 text-sm sm:text-base">👆 Pilih produk untuk melihat detail</div>
-          )}
-
-          {selectedProduct && detail.length > 0 && (
-            <>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 break-words">{selectedProduct.LSDBS_NAME}</h3>
-              <div className="overflow-x-auto border rounded-lg">
-                <table className="min-w-full text-xs sm:text-sm">
-                  <thead className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white sticky top-0">
-                    <tr>
-                      <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">PSET_ID</th>
-                      <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">INSURED_PERIOD_MONTH</th>
-                      <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">MIN_UP</th>
-                      <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">MAX_UP</th>
-                      <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">MIN_PREMIUM</th>
-                      <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">MAX_PREMIUM</th>
-                      <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">LPF_COI_BASIC</th>
-                      <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">LPF_UP</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {detail.map((item, idx) => (
-                      <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                        <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2">
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2">
-                            <span className="font-medium">{item.PSET_ID}</span>
-                            <button
-                              onClick={() => handleEditPset(item)}
-                              className="text-orange-500 hover:text-orange-700 text-xs underline whitespace-nowrap"
-                            >
-                              Edit
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2">{item.INSURED_PERIOD_MONTH}</td>
-                        <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 break-all">{formatCurrency(item.MIN_UP, selectedProduct?.LKU_ID)}</td>
-                        <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 break-all">{formatCurrency(item.MAX_UP, selectedProduct?.LKU_ID)}</td>
-                        <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 break-all">{formatCurrency(item.MIN_PREMIUM, selectedProduct?.LKU_ID)}</td>
-                        <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 break-all">{formatCurrency(item.MAX_PREMIUM, selectedProduct?.LKU_ID)}</td>
-                        <td
-                          className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-blue-600 underline cursor-pointer break-all"
-                          onClick={() => handleCellClick('Detail COI Basic', 'LPF_COI_BASIC', item.LPF_COI_BASIC)}
-                        >
-                          {item.LPF_COI_BASIC}
-                        </td>
-                        <td
-                          className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-green-600 underline cursor-pointer break-all"
-                          onClick={() => handleCellClick('Detail UP', 'LPF_UP', item.LPF_UP)}
-                        >
-                          {item.LPF_UP}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-3 sm:mt-4">
-                <button
-                  onClick={() => setIsRiderModalOpen(true)}
-                  className="px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md text-sm sm:text-base"
-                >
-                  Lihat Daftar Rider 🏇
-                </button>
-              </div>
-            </>
-          )}
-
-          {selectedProduct && (
-            <div className="mt-4 sm:mt-6">
-              <h4 className="text-sm sm:text-md font-semibold text-gray-800 mb-2">💰 Investment Data</h4>
-              <div className="border rounded-lg">
-                {productInvest.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full text-xs sm:text-sm">
-                      <thead className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white sticky top-0">
-                        <tr>
-                          <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">PSET_ID</th>
-                          <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">LJI_ID</th>
-                          <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">LJI_INVEST</th>
-                          <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">JENIS</th>
-                          <th className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 text-left whitespace-nowrap">LJI_DESC</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {productInvest.map((item, idx) => (
-                          <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                            <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2">{item.PSET_ID}</td>
-                            <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2">{item.LJI_ID}</td>
-                            <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 break-words">{item.LJI_INVEST}</td>
-                            <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2">{item.JENIS}</td>
-                            <td className="px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 break-words">{item.LJI_DESC}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="p-3 sm:p-4 text-gray-500 text-sm">Tidak ada data investasi</div>
+          {/* Right panel */}
+          <div className="xl:col-span-7 2xl:col-span-8 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-md border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <div className="h-full flex flex-col">
+              {/* Header area */}
+              <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200 dark:border-gray-700">
+                {selectedProduct && (
+                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 dark:text-gray-200 break-words">
+                    {selectedProduct.LSDBS_NAME}
+                  </h3>
                 )}
               </div>
-            </div>
-          )}
 
-          {selectedProduct && (
-            <TenagaPemasar
-              lsbsId={selectedProduct.LSBS_ID}
-              lsdbsNumber={selectedProduct.LSDBS_NUMBER}
-            />
-          )}
+              {/* Content area - scrollable */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+                  {loadingDetail && (
+                    <div className="text-center py-8 sm:py-12 text-gray-500 dark:text-gray-400 text-sm sm:text-base">⏳ Memuat detail produk...</div>
+                  )}
+
+                  {!selectedProduct && !loadingDetail && (
+                    <div className="text-center py-12 sm:py-16 text-gray-500 dark:text-gray-400 text-sm sm:text-base">👆 Pilih produk untuk melihat detail</div>
+                  )}
+
+                  {selectedProduct && detail.length > 0 && (
+                    <div className="space-y-4 sm:space-y-6">
+                      {/* Product Detail */}
+                      <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3 sm:p-4">
+                        <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">📊 Detail Produk</h4>
+                        
+                        {/* Mobile Card View */}
+                        <div className="block lg:hidden space-y-3">
+                          {detail.map((item, idx) => (
+                            <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                              <div className="space-y-2 text-xs sm:text-sm">
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-gray-600 dark:text-gray-400">PSET_ID:</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-gray-900 dark:text-gray-100">{item.PSET_ID}</span>
+                                    <button
+                                      onClick={() => handleEditPset(item)}
+                                      className="text-orange-500 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 text-xs underline"
+                                    >
+                                      Edit
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-gray-600 dark:text-gray-400">Period:</span>
+                                  <span className="text-gray-900 dark:text-gray-100">{item.INSURED_PERIOD_MONTH}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-gray-600 dark:text-gray-400">MIN_UP:</span>
+                                  <span className="text-gray-900 dark:text-gray-100 text-right">{formatCurrency(item.MIN_UP, selectedProduct?.LKU_ID)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-gray-600 dark:text-gray-400">MAX_UP:</span>
+                                  <span className="text-gray-900 dark:text-gray-100 text-right">{formatCurrency(item.MAX_UP, selectedProduct?.LKU_ID)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-gray-600 dark:text-gray-400">MIN_PREMIUM:</span>
+                                  <span className="text-gray-900 dark:text-gray-100 text-right">{formatCurrency(item.MIN_PREMIUM, selectedProduct?.LKU_ID)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-gray-600 dark:text-gray-400">MAX_PREMIUM:</span>
+                                  <span className="text-gray-900 dark:text-gray-100 text-right">{formatCurrency(item.MAX_PREMIUM, selectedProduct?.LKU_ID)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-gray-600 dark:text-gray-400">LPF_COI_BASIC:</span>
+                                  <span
+                                    className="text-blue-600 dark:text-blue-400 underline cursor-pointer hover:text-blue-800 dark:hover:text-blue-300 transition-colors text-right"
+                                    onClick={() => handleCellClick('Detail LPF_COI Basic', 'LPF_COI_BASIC', item.LPF_COI_BASIC)}
+                                  >
+                                    {item.LPF_COI_BASIC}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="font-medium text-gray-600 dark:text-gray-400">LPF_UP:</span>
+                                  <span
+                                    className="text-green-600 dark:text-green-400 underline cursor-pointer hover:text-green-800 dark:hover:text-green-300 transition-colors text-right"
+                                    onClick={() => handleCellClick('Detail UP', 'LPF_UP', item.LPF_UP)}
+                                  >
+                                    {item.LPF_UP}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Desktop Table View */}
+                        <div className="hidden lg:block border rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto max-h-96">
+                          <div className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white sticky top-0 grid grid-cols-8 gap-1 p-2 text-xs font-semibold">
+                            <div className="col-span-1">PSET_ID</div>
+                            <div className="col-span-1">PERIOD</div>
+                            <div className="col-span-1">MIN_UP</div>
+                            <div className="col-span-1">MAX_UP</div>
+                            <div className="col-span-1">MIN_PREM</div>
+                            <div className="col-span-1">MAX_PREM</div>
+                            <div className="col-span-1">LPF_COI_BASIC</div>
+                            <div className="col-span-1">LPF_UP</div>
+                          </div>
+                          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                            {detail.map((item, idx) => (
+                              <div key={idx} className={`grid grid-cols-8 gap-1 p-2 text-xs ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'}`}>
+                                <div className="col-span-1 text-gray-900 dark:text-gray-100">
+                                  <div className="flex flex-col gap-1">
+                                    <span className="font-medium">{item.PSET_ID}</span>
+                                    <button
+                                      onClick={() => handleEditPset(item)}
+                                      className="text-orange-500 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 underline"
+                                    >
+                                      Edit
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={item.INSURED_PERIOD_MONTH}>
+                                  {item.INSURED_PERIOD_MONTH}
+                                </div>
+                                <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={formatCurrency(item.MIN_UP, selectedProduct?.LKU_ID)}>
+                                  {formatCurrency(item.MIN_UP, selectedProduct?.LKU_ID)}
+                                </div>
+                                <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={formatCurrency(item.MAX_UP, selectedProduct?.LKU_ID)}>
+                                  {formatCurrency(item.MAX_UP, selectedProduct?.LKU_ID)}
+                                </div>
+                                <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={formatCurrency(item.MIN_PREMIUM, selectedProduct?.LKU_ID)}>
+                                  {formatCurrency(item.MIN_PREMIUM, selectedProduct?.LKU_ID)}
+                                </div>
+                                <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={formatCurrency(item.MAX_PREMIUM, selectedProduct?.LKU_ID)}>
+                                  {formatCurrency(item.MAX_PREMIUM, selectedProduct?.LKU_ID)}
+                                </div>
+                                <div
+                                  className="col-span-1 text-blue-600 dark:text-blue-400 underline cursor-pointer hover:text-blue-800 dark:hover:text-blue-300 transition-colors truncate"
+                                  title={item.LPF_COI_BASIC}
+                                  onClick={() => handleCellClick('Detail LPF COI Basic', 'LPF_COI_BASIC', item.LPF_COI_BASIC)}
+                                >
+                                  {item.LPF_COI_BASIC}
+                                </div>
+                                <div
+                                  className="col-span-1 text-green-600 dark:text-green-400 underline cursor-pointer hover:text-green-800 dark:hover:text-green-300 transition-colors truncate"
+                                  title={item.LPF_UP}
+                                  onClick={() => handleCellClick('Detail UP', 'LPF_UP', item.LPF_UP)}
+                                >
+                                  {item.LPF_UP}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Rider Button */}
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                        <button
+                          onClick={() => setIsRiderModalOpen(true)}
+                          className="px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md text-sm sm:text-base font-medium transition-all duration-200 hover:shadow-lg flex items-center justify-center gap-2"
+                        >
+                          <span>🏇</span>
+                          <span>Lihat Daftar Rider</span>
+                        </button>
+                      </div>
+
+                      {/* Investment Data */}
+                      <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3 sm:p-4">
+                        <h4 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">💰 Investment Data</h4>
+                        <div className="border rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
+                          {productInvest.length > 0 ? (
+                            <div>
+                              {/* Mobile Card View */}
+                              <div className="block lg:hidden space-y-3 p-3">
+                                {productInvest.map((item, idx) => (
+                                  <div key={idx} className="border-b last:border-b-0 border-gray-200 dark:border-gray-700 pb-3 last:pb-0">
+                                    <div className="space-y-2 text-xs sm:text-sm">
+                                      <div className="flex justify-between">
+                                        <span className="font-medium text-gray-600 dark:text-gray-400">PSET_ID:</span>
+                                        <span className="text-gray-900 dark:text-gray-100">{item.PSET_ID}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="font-medium text-gray-600 dark:text-gray-400">LJI_ID:</span>
+                                        <span className="text-gray-900 dark:text-gray-100">{item.LJI_ID}</span>
+                                      </div>
+                                      <div className="space-y-1">
+                                        <span className="font-medium text-gray-600 dark:text-gray-400">LJI_INVEST:</span>
+                                        <div className="text-gray-900 dark:text-gray-100 text-sm break-words">{item.LJI_INVEST}</div>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="font-medium text-gray-600 dark:text-gray-400">JENIS:</span>
+                                        <span className="text-gray-900 dark:text-gray-100">{item.JENIS}</span>
+                                      </div>
+                                      <div className="space-y-1">
+                                        <span className="font-medium text-gray-600 dark:text-gray-400">LJI_DESC:</span>
+                                        <div className="text-gray-900 dark:text-gray-100 text-sm break-words">{item.LJI_DESC}</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Desktop Table View */}
+                              <div className="hidden lg:block">
+                                <div className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white grid grid-cols-5 gap-1 p-2 text-xs font-semibold">
+                                  <div className="col-span-1">PSET_ID</div>
+                                  <div className="col-span-1">LJI_ID</div>
+                                  <div className="col-span-1">LJI_INVEST</div>
+                                  <div className="col-span-1">JENIS</div>
+                                  <div className="col-span-1">LJI_DESC</div>
+                                </div>
+                                <div className="divide-y divide-gray-200 dark:divide-gray-700 max-h-64 overflow-y-auto">
+                                  {productInvest.map((item, idx) => (
+                                    <div key={idx} className={`grid grid-cols-5 gap-1 p-2 text-xs ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'}`}>
+                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={item.PSET_ID}>
+                                        {item.PSET_ID}
+                                      </div>
+                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={item.LJI_ID}>
+                                        {item.LJI_ID}
+                                      </div>
+                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={item.LJI_INVEST}>
+                                        {item.LJI_INVEST}
+                                      </div>
+                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={item.LJI_JENIS}>
+                                        {item.JENIS}
+                                      </div>
+                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 break-words whitespace-normal">
+                                        {item.LJI_DESC}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-4 sm:p-6 text-gray-500 dark:text-gray-400 text-sm text-center">Tidak ada data investasi</div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Tenaga Pemasar */}
+                      <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3 sm:p-4">
+                        <TenagaPemasar
+                          lsbsId={selectedProduct.LSBS_ID}
+                          lsdbsNumber={selectedProduct.LSDBS_NUMBER}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Modals placed at the end of the return statement */}
+      {/* Modals */}
       {modalData && <ModalFormula data={modalData} onClose={() => setModalData(null)} />}
       {infoModal.message && <InfoModal title={infoModal.title} message={infoModal.message} onClose={() => setInfoModal({ title: '', message: '' })} />}
       {detailPsetModal.isOpen && <DetailPsetModal isOpen={detailPsetModal.isOpen} onClose={() => setDetailPsetModal({ isOpen: false, data: [], title: '' })} data={detailPsetModal.data} title={detailPsetModal.title} />}

@@ -18,8 +18,6 @@ export default function ModalEditPset({
   if (!isOpen || !currentPset) return null;
   
   const handleShowDetail = async () => {
-    // Diasumsikan ada fungsi di parent atau API untuk memuat detail.
-    // Untuk contoh ini, kita akan menggunakan data dummy.
     const dummyData = [
       {
         PSET_ID: selectedPsetId,
@@ -46,21 +44,24 @@ export default function ModalEditPset({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl p-6 w-[90%] max-w-lg shadow-xl border border-gray-200"
+        className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-[90%] max-w-lg shadow-xl 
+                   border border-gray-200 dark:border-gray-700 transition-colors"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-xl font-bold text-gray-800">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
           ✏️ Ubah PSET_ID
         </h3>
-        <p className="text-sm mt-2 text-gray-600">
+        <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
           Ubah PSET_ID <span className="font-semibold">{currentPset.PSET_ID}</span> ke:
         </p>
 
         <select
           value={selectedPsetId}
           onChange={(e) => setSelectedPsetId(e.target.value)}
-          className="mt-4 w-full border border-gray-300 focus:border-blue-400 rounded-lg p-3 text-sm 
-                     bg-white focus:shadow-md transition-all duration-200"
+          className="mt-4 w-full border border-gray-300 dark:border-gray-600 
+                     focus:border-blue-400 rounded-lg p-3 text-sm 
+                     bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 
+                     focus:shadow-md transition-all duration-200"
         >
           <option value="">-- Pilih PSET_ID --</option>
           {psetList.map((pset) => (
@@ -74,7 +75,8 @@ export default function ModalEditPset({
           <button
             onClick={onClose}
             className="px-5 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium 
-                       hover:bg-gray-200 transition-all duration-200"
+                       hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600
+                       transition-all duration-200"
           >
             ❌ Batal
           </button>
@@ -97,13 +99,12 @@ export default function ModalEditPset({
         </div>
       </div>
       
-      {/* Layer kedua (DetailPsetModal) dengan z-index 60, berada di atas modal induk */}
+      {/* Layer kedua (DetailPsetModal) dengan z-index 60 */}
       <DetailPsetModal 
         isOpen={detailPsetModal.isOpen} 
         onClose={() => setDetailPsetModal({ isOpen: false, data: [], title: '' })} 
         data={detailPsetModal.data} 
         title={detailPsetModal.title} 
-        // Menggunakan z-index lebih tinggi agar tampil di atas
         className="z-[60]"
       />
     </div>
