@@ -4,7 +4,6 @@ import {
   fetchPsetList,
   fetchProductFormula,
   fetchCombinedProductData,
-  updateDetBisnis,
   fetchTenagaPemasarList,
   fetchRiderList
 } from '../api/productApi';
@@ -12,21 +11,18 @@ import { formatCurrency } from '../utils/formatCurrency';
 import ModalFormula from './ModalFormula';
 import InfoModal from './InfoModal';
 import DetailPsetModal from './DetailPsetModal';
-import ModalEditPset from './ModalEditPset';
 import LogoutButton from './LogoutButton';
 
-// Hook untuk dark mode
 // Hook untuk dark mode
 const useDarkMode = () => {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
-      // Prioritaskan localStorage, fallback ke preferensi sistem
       const saved = localStorage.getItem('darkMode');
-     return saved === 'true';
+      return saved === 'true';
     }
     return false;
   });
-  // Effect tambahan untuk memastikan class diterapkan saat mount
+
   useEffect(() => {
     localStorage.setItem('darkMode', isDark ? 'true' : 'false');
     
@@ -216,7 +212,6 @@ export default function ProductList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [modalData, setModalData] = useState(null);
   const [infoModal, setInfoModal] = useState({ title: '', message: '' });
-  const [editingPset, setEditingPset] = useState(null);
   const [detailPsetModal, setDetailPsetModal] = useState({ isOpen: false, data: [], title: '' });
 
   const [isRiderModalOpen, setIsRiderModalOpen] = useState(false);
@@ -300,6 +295,7 @@ export default function ProductList() {
       setLoadingDetail(false);
     }
   }, []);
+
   const handleRowClick = useCallback(async (prod) => {
     setSelectedProduct(prod);
     await loadDetailForPset(prod);
@@ -320,49 +316,9 @@ export default function ProductList() {
     }
   };
 
-  const handlePsetSave = async (newPsetId) => {
-    if (!newPsetId) return alert('Pilih PSET_ID terlebih dahulu.');
-    if (!selectedProduct) return alert('Pilih produk dulu.');
-
-    try {
-      const payload = {
-        lsbs_id: selectedProduct.LSBS_ID,
-        lsdbs_number: selectedProduct.LSDBS_NUMBER,
-        pset_id: newPsetId,
-      };
-      await updateDetBisnis(payload);
-      alert('PSET_ID berhasil diupdate.');
-      setEditingPset(null);
-
-      const updatedSelectedProduct = { ...selectedProduct, PSET_ID: newPsetId };
-      setSelectedProduct(updatedSelectedProduct);
-
-      setProductOptions(prev =>
-        prev.map(product =>
-          product.LSBS_ID === selectedProduct.LSBS_ID &&
-          product.LSDBS_NUMBER === selectedProduct.LSDBS_NUMBER
-            ? { ...product, PSET_ID: newPsetId }
-            : product
-        )
-      );
-
-      await handleRowClick(updatedSelectedProduct);
-    } catch (err) {
-      console.error(err);
-      alert('Gagal update PSET_ID.');
-    }
-  };
-
-  const handleEditPset = (item) => {
-    setEditingPset({
-      PSET_ID: item.PSET_ID,
-      LSBS_ID: selectedProduct?.LSBS_ID || item.LSBS_ID,
-      LSDBS_NUMBER: selectedProduct?.LSDBS_NUMBER || item.LSDBS_NUMBER
-    });
-  };
-
-  const handleShowDetail = async (psetData) => {
-    await loadDetailForPset(psetData, true);
+  const handleShowPsetDetail = async (psetId) => {
+    if (!psetId) return;
+    await loadDetailForPset({ PSET_ID: psetId }, true);
   };
 
   const filteredProducts = useMemo(() => {
@@ -375,6 +331,14 @@ export default function ProductList() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+      {/* Header with Logout and Dark Mode */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40 shadow-sm">
+        <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-3 flex items-center justify-end gap-2">
+          <DarkModeToggle isDark={isDark} toggleDarkMode={toggleDarkMode} />
+          <LogoutButton />
+        </div>
+      </div>
+
       <div className="container mx-auto p-2 sm:p-4 lg:p-6">
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4 lg:gap-6">
           
@@ -382,11 +346,7 @@ export default function ProductList() {
           <div className="xl:col-span-5 2xl:col-span-4 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6 shadow-md border border-gray-200 dark:border-gray-700 transition-colors duration-200">
             <div className="flex flex-col gap-2 mb-3 sm:mb-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 dark:text-gray-200">List Produk</h2>
-                  <DarkModeToggle isDark={isDark} toggleDarkMode={toggleDarkMode} />
-                </div>
-                <LogoutButton />
+                <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 dark:text-gray-200">List Produk</h2>
               </div>
             </div>
             <input
@@ -427,23 +387,24 @@ export default function ProductList() {
                       </div>
                       <div className="space-y-1">
                         <span className="font-medium text-gray-600 dark:text-gray-400">Name:</span>
-                        <div className={`text-xs ${p.LSDBS_AKTIF === 0 ? 'text-pink-700 dark:text-pink-300' : 'text-gray-800 dark:text-gray-200'}`}>
+                        <div className="text-xs text-gray-800 dark:text-gray-200">
                           {p.LSDBS_NAME}
-                          {p.LSDBS_AKTIF === 0 && <span className="ml-1 text-pink-600 dark:text-pink-400 font-semibold">(NON-AKTIF)</span>}
                         </div>
                       </div>
                       <div className="flex justify-between items-start">
                         <span className="font-medium text-gray-600 dark:text-gray-400">PSET_ID:</span>
                         <div className="flex flex-col items-end gap-1">
-                          <span className={`text-xs ${p.LSDBS_AKTIF === 0 ? 'text-pink-700 dark:text-pink-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                          <span className="text-xs text-gray-700 dark:text-gray-300">
                             {Array.isArray(p.PSET_ID) ? p.PSET_ID.join(', ') : (p.PSET_ID ?? '-')}
                           </span>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleEditPset(p); }}
-                            className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs underline"
-                          >
-                            Edit
-                          </button>
+                          {p.PSET_ID && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleShowPsetDetail(p.PSET_ID); }}
+                              className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs underline"
+                            >
+                              Detail
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -476,22 +437,23 @@ export default function ProductList() {
                       <div className="col-span-2 text-gray-900 dark:text-gray-100 truncate" title={p.LSDBS_NUMBER}>
                         {p.LSDBS_NUMBER}
                       </div>
-                      <div className={`col-span-5 font-medium ${p.LSDBS_AKTIF === 0 ? 'text-pink-700 dark:text-pink-300' : 'text-gray-800 dark:text-gray-200'}`}>
+                      <div className="col-span-5 font-medium text-gray-800 dark:text-gray-200">
                         <div className="break-words leading-tight">
                           {p.LSDBS_NAME}
-                          {p.LSDBS_AKTIF === 0 && <span className="ml-1 text-pink-600 dark:text-pink-400 font-semibold">(NON-AKTIF)</span>}
                         </div>
                       </div>
                       <div className="col-span-3 space-y-1">
-                        <div className={`truncate ${p.LSDBS_AKTIF === 0 ? 'text-pink-700 dark:text-pink-300' : 'text-gray-700 dark:text-gray-300'}`} title={Array.isArray(p.PSET_ID) ? p.PSET_ID.join(', ') : (p.PSET_ID ?? '-')}>
+                        <div className="truncate text-gray-700 dark:text-gray-300" title={Array.isArray(p.PSET_ID) ? p.PSET_ID.join(', ') : (p.PSET_ID ?? '-')}>
                           {Array.isArray(p.PSET_ID) ? p.PSET_ID.join(', ') : (p.PSET_ID ?? '-')}
                         </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleEditPset(p); }}
-                          className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
-                        >
-                          Edit
-                        </button>
+                        {p.PSET_ID && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleShowPsetDetail(p.PSET_ID); }}
+                            className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
+                          >
+                            Detail
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -543,10 +505,10 @@ export default function ProductList() {
                                   <div className="flex items-center gap-2">
                                     <span className="text-gray-900 dark:text-gray-100">{item.PSET_ID}</span>
                                     <button
-                                      onClick={() => handleEditPset(item)}
-                                      className="text-orange-500 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 text-xs underline"
+                                      onClick={() => handleShowPsetDetail(item.PSET_ID)}
+                                      className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs underline"
                                     >
-                                      Edit
+                                      Detail
                                     </button>
                                   </div>
                                 </div>
@@ -612,10 +574,10 @@ export default function ProductList() {
                                   <div className="flex flex-col gap-1">
                                     <span className="font-medium">{item.PSET_ID}</span>
                                     <button
-                                      onClick={() => handleEditPset(item)}
-                                      className="text-orange-500 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 underline"
+                                      onClick={() => handleShowPsetDetail(item.PSET_ID)}
+                                      className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
                                     >
-                                      Edit
+                                      Detail
                                     </button>
                                   </div>
                                 </div>
@@ -658,7 +620,7 @@ export default function ProductList() {
                       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                         <button
                           onClick={() => setIsRiderModalOpen(true)}
-                          className="px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md text-sm sm:text-base font-medium transition-all duration-200 hover:shadow-lg flex items-center justify-center gap-2"
+                          className="px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-lg flex items-center justify-center gap-2"
                         >
                           <span>🏇</span>
                           <span>Lihat Daftar Rider</span>
@@ -759,7 +721,6 @@ export default function ProductList() {
       {modalData && <ModalFormula data={modalData} onClose={() => setModalData(null)} />}
       {infoModal.message && <InfoModal title={infoModal.title} message={infoModal.message} onClose={() => setInfoModal({ title: '', message: '' })} />}
       {detailPsetModal.isOpen && <DetailPsetModal isOpen={detailPsetModal.isOpen} onClose={() => setDetailPsetModal({ isOpen: false, data: [], title: '' })} data={detailPsetModal.data} title={detailPsetModal.title} />}
-      {editingPset && <ModalEditPset isOpen={!!editingPset} onClose={() => setEditingPset(null)} onSave={handlePsetSave} onShowDetail={handleShowDetail} psetList={psetList} currentPset={editingPset} />}
       {selectedProduct && <Rider isOpen={isRiderModalOpen} onClose={() => setIsRiderModalOpen(false)} title="Daftar Nama Rider" lsbsId={selectedProduct.LSBS_ID} lsdbsNumber={selectedProduct.LSDBS_NUMBER} />}
     </div>
   );
