@@ -1,6 +1,3 @@
-// productApi.js
-
-// Ambil daftar produk
 export const fetchProductList = async () => {
   const res = await fetch("http://10.10.0.31:8020/api/pkg/product/getProductList", {
     method: "POST",
