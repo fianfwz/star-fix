@@ -781,16 +781,16 @@ export default function ProductList() {
                                 <div className="divide-y divide-gray-200 dark:divide-gray-700 max-h-64 overflow-y-auto">
                                   {productInvest.map((item, idx) => (
                                     <div key={idx} className={`grid grid-cols-5 gap-1 p-2 text-xs ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'}`}>
-                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={item.PSET_ID}>
+                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 break-words whitespace-normal">
                                         {item.PSET_ID}
                                       </div>
-                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={item.LJI_ID}>
+                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 break-words whitespace-normal">
                                         {item.LJI_ID}
                                       </div>
-                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={item.LJI_INVEST}>
+                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 break-words whitespace-normal">
                                         {item.LJI_INVEST}
                                       </div>
-                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 truncate" title={item.LJI_JENIS}>
+                                      <div className="col-span-1 text-gray-900 dark:text-gray-100 break-words whitespace-normal">
                                         {item.JENIS}
                                       </div>
                                       <div className="col-span-1 text-gray-900 dark:text-gray-100 break-words whitespace-normal">
