@@ -525,7 +525,7 @@ export default function ProductList() {
             <div className="max-h-[40vh] sm:max-h-[50vh] lg:max-h-[65vh] 2xl:max-h-[70vh] overflow-y-auto border rounded-lg border-gray-200 dark:border-gray-700">
               <div className="w-full">
                 <div className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white sticky top-0 grid grid-cols-12 gap-1 p-2 text-xs font-semibold">
-                  <div className="col-span-2">ID</div>
+                  <div className="col-span-2">LSBS_ID</div>
                   <div className="col-span-2">NUM</div>
                   <div className="col-span-5">NAME</div>
                   <div className="col-span-3">PSET_ID</div>
@@ -642,8 +642,8 @@ export default function ProductList() {
                               <div className="col-span-1">PERIOD</div>
                               <div className="col-span-1">MIN_UP</div>
                               <div className="col-span-1">MAX_UP</div>
-                              <div className="col-span-1">MIN_PREMI</div>
-                              <div className="col-span-1">MAX_PREMI</div>
+                              <div className="col-span-1">MIN_PREMIUM</div>
+                              <div className="col-span-1">MAX_PREMIUM</div>
                               <div className="col-span-1">LPF_COI_BASIC</div>
                               <div className="col-span-1">LPF_UP</div>
                             </div>

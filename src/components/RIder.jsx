@@ -187,16 +187,22 @@ export default function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber, onR
             <p className="p-4 text-center text-gray-500 dark:text-gray-400">Tidak ada data rider.</p>
           ) : (
             <div className="w-full">
-              <div className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white p-3 font-semibold text-xs sm:text-sm">
-                NAMA RIDER
+              <div className="grid grid-cols-3 bg-gradient-to-r from-blue-900 via-blue-700 to-blue-400 text-white p-3 font-semibold text-xs sm:text-sm">
+                <div>KODE</div>
+                <div>KODE DETAIL</div>
+                <div>NAMA RIDER</div>
               </div>
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {data.map((item, idx) => (
                   <div
                     key={idx}
                     onClick={() => handleRiderClick(item)}
-                    className="p-3 text-gray-800 dark:text-gray-200 text-xs sm:text-sm hover:bg-blue-100 dark:hover:bg-blue-900 transition cursor-pointer"
+                    className="grid grid-cols-3 p-3 text-gray-800 dark:text-gray-200 text-xs sm:text-sm hover:bg-blue-100 dark:hover:bg-blue-900 transition cursor-pointer"
                   >
+                    <div>{item.LSBS_ID || item.lsbs_id || "-"}</div>
+
+                    <div>{item.LSDBS_NUMBER || item.lsdbs_number || "-"}</div>
+
                     <div className="font-medium text-blue-600 dark:text-blue-400">
                       {item.NAMA_RIDER || item.nama_rider || item.NAME || item.name || "Unnamed Rider"}
                     </div>
