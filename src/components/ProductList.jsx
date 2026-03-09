@@ -67,7 +67,6 @@ function TenagaPemasar({ lsbsId, lsdbsNumber }) {
         if (!mounted) return;
         setData(list);
       } catch (err) {
-        console.error('Gagal fetch TenagaPemasar:', err);
         if (!mounted) return;
         setError(err.message || 'Gagal memuat tenaga pemasar');
       } finally {
@@ -130,7 +129,6 @@ export default function ProductList() {
 
   // Load product detail
   const loadProductDetail = useCallback(async (product) => {
-    console.log("🎯 Loading product detail:", product);
     setSelectedProduct(product);
     setLoadingDetail(true);
     setDetail([]);
@@ -148,8 +146,6 @@ export default function ProductList() {
         };
       }
 
-      console.log("📤 Fetching with payload:", payload);
-      
       const json = await fetchCombinedProductData(payload);
 
       let productCalc = [];
@@ -179,7 +175,6 @@ export default function ProductList() {
       setProductInvest(allProductInvest);
       
     } catch (err) {
-      console.error('Error loading product detail:', err);
       setInfoModal({
         title: 'Informasi',
         message: 'Data detail produk tidak tersedia atau belum ada di sistem.'
@@ -196,8 +191,7 @@ export default function ProductList() {
 
   // Handler klik rider dari modal - GUNAKAN DATA DARI RIDER.JSX
   const handleRiderClickFromModal = useCallback((riderData) => {
-    console.log("🎯 Rider clicked from modal (ProductList):", riderData);
-    
+
     // 1. Tutup modal
     setIsRiderModalOpen(false);
     
@@ -213,8 +207,7 @@ export default function ProductList() {
       lsbsId = riderData._debug.foundKeys.lsbsId || lsbsId;
       lsdbsNumber = riderData._debug.foundKeys.lsdbsNumber || lsdbsNumber;
     }
-    
-    console.log("📋 Extracted IDs:", { lsbsId, lsdbsNumber });
+  
     
     // 4. Simpan pending rider dengan flag searchByName jika LSBS_ID/NUMBER dari fallback
     const shouldSearchByName = !riderData._debug?.foundKeys?.lsbsId || 
@@ -230,53 +223,37 @@ export default function ProductList() {
     });
     
     // 5. Switch ke tab rider
-    console.log("🔄 Switching to RIDER tab...");
     setFilterType('rider');
     
-    console.log("✅ Pending rider set, searchByName:", shouldSearchByName);
   }, []);
 
   // Effect untuk handle pending rider setelah list dimuat
   useEffect(() => {
-    console.log("🔍 useEffect triggered:", { 
-      hasPendingRider: !!pendingRider, 
-      filterType, 
-      loadingList,
-      productOptionsCount: productOptions.length 
-    });
-    
+
     if (!pendingRider) {
-      console.log("⏭️ No pending rider, skipping");
       return;
     }
     
     if (filterType !== 'rider') {
-      console.log("⏭️ Not on rider tab yet, current:", filterType);
       return;
     }
     
     if (loadingList) {
-      console.log("⏭️ Still loading list, waiting...");
       return;
     }
-    
-    console.log("✅ All conditions met, processing pending rider:", pendingRider);
-    
+        
     // Tunggu list selesai dimuat
     const timer = setTimeout(() => {
-      console.log("⏰ Timer executed, searching for rider in list...");
       
       let riderInList = null;
       
       // Cari rider berdasarkan ID atau nama
       if (pendingRider.searchByName) {
-        console.log("🔍 Searching by name:", pendingRider.originalName);
         riderInList = productOptions.find(
           p => p.LSDBS_NAME && 
                p.LSDBS_NAME.toLowerCase() === pendingRider.originalName.toLowerCase()
         );
       } else {
-        console.log("🔍 Searching by ID:", pendingRider.LSBS_ID, pendingRider.LSDBS_NUMBER);
         riderInList = productOptions.find(
           p => Number(p.LSBS_ID) === Number(pendingRider.LSBS_ID) && 
                Number(p.LSDBS_NUMBER) === Number(pendingRider.LSDBS_NUMBER)
@@ -284,7 +261,6 @@ export default function ProductList() {
       }
       
       if (riderInList) {
-        console.log("✅ Rider found in list:", riderInList);
         
         // Load detail rider LANGSUNG
         loadProductDetail(riderInList);
@@ -293,7 +269,6 @@ export default function ProductList() {
         setTimeout(() => {
           const element = document.querySelector(`[data-rider-id="${riderInList.LSBS_ID}-${riderInList.LSDBS_NUMBER}"]`);
           if (element) {
-            console.log("📍 Scrolling to element");
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
             // Highlight
@@ -304,16 +279,12 @@ export default function ProductList() {
               element.classList.remove('!bg-yellow-200', 'dark:!bg-yellow-800', 'ring-2', 'ring-yellow-500', 'shadow-lg');
             }, 3000);
           } else {
-            console.log("⚠️ Element not found in DOM");
           }
         }, 500);
         
         // Clear pending rider
         setPendingRider(null);
       } else {
-        console.log("❌ Rider NOT found in list");
-        console.log("🔍 Searched for:", pendingRider.searchByName ? `Name: ${pendingRider.originalName}` : `ID: ${pendingRider.LSBS_ID}-${pendingRider.LSDBS_NUMBER}`);
-        console.log("📋 Available riders:", productOptions.map(p => `${p.LSBS_ID}-${p.LSDBS_NUMBER}: ${p.LSDBS_NAME}`));
         setInfoModal({
           title: 'Rider Tidak Ditemukan',
           message: `Rider "${pendingRider.LSDBS_NAME || pendingRider.originalName}" tidak ditemukan dalam daftar.\n\nKemungkinan rider ini tidak memiliki PSET_ID.`
@@ -323,7 +294,6 @@ export default function ProductList() {
     }, 1000); // Tambah delay jadi 1 detik
     
     return () => {
-      console.log("🧹 Cleanup timer");
       clearTimeout(timer);
     };
   }, [pendingRider, filterType, loadingList, productOptions, loadProductDetail]);
@@ -347,7 +317,6 @@ export default function ProductList() {
         details: Array.isArray(formulas) ? formulas : [formulas] 
       });
     } catch (err) {
-      console.error('Error fetching formula:', err);
       setInfoModal({
         title: 'Informasi',
         message: 'Data formula tidak tersedia untuk produk ini.'
@@ -406,12 +375,9 @@ export default function ProductList() {
           });
         }
 
-        console.log(`✅ Loaded ${filteredList.length} products for filter: ${filterType}`);
-        
         setProductOptions(filteredList);
         setPsetList(Array.isArray(psets) ? psets : []);
       } catch (err) {
-        console.error(err);
         setInfoModal({
           title: 'Gagal Memuat Data',
           message: err.message || 'Error'

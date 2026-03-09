@@ -23,7 +23,6 @@ const observer = new MutationObserver(() => {
   const hasDark = document.documentElement.classList.contains('dark');
   
   if (darkMode === 'true' && !hasDark) {
-    console.log('Dark class was removed! Re-adding...');
     document.documentElement.classList.add('dark');
   }
 });

@@ -21,8 +21,6 @@ export default function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber, onR
       try {
         const result = await fetchRiderList(lsbsId, lsdbsNumber);
         
-        console.log("📥 API result:", result);
-        
         // Handle berbagai format respons
         let riderData = [];
         
@@ -40,20 +38,16 @@ export default function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber, onR
           }
         }
         
-        console.log("✅ Extracted rider data:", riderData);
         
         // Debug: Tampilkan properti item pertama jika ada
         if (riderData.length > 0) {
           const firstItem = riderData[0];
-          console.log("🔍 First item properties:");
           Object.keys(firstItem).forEach(key => {
-            console.log(`  ${key}: ${firstItem[key]}`);
           });
         }
         
         setData(riderData);
       } catch (err) {
-        console.error("❌ Error fetching rider list:", err);
         setError(err.message || "Gagal memuat data rider.");
       } finally {
         setLoading(false);
@@ -63,12 +57,9 @@ export default function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber, onR
   }, [isOpen, showRiderList, lsbsId, lsdbsNumber]);
 
   const handleRiderClick = (rider) => {
-    console.log("👆 Rider clicked:", rider);
     
     // Debug: Tampilkan semua properti rider
-    console.log("🔍 All properties in clicked rider:");
     Object.keys(rider).forEach(key => {
-      console.log(`  ${key}: ${rider[key]} (${typeof rider[key]})`);
     });
     
     // Cari LSBS_ID dan LSDBS_NUMBER dengan berbagai kemungkinan nama properti
@@ -85,7 +76,6 @@ export default function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber, onR
     for (const key of lsbsIdKeys) {
       if (rider[key] !== undefined && rider[key] !== null && rider[key] !== '') {
         lsbsIdFound = rider[key];
-        console.log(`✅ Found LSBS_ID as "${key}": ${lsbsIdFound}`);
         break;
       }
     }
@@ -94,7 +84,6 @@ export default function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber, onR
     for (const key of lsdbsNumberKeys) {
       if (rider[key] !== undefined && rider[key] !== null && rider[key] !== '') {
         lsdbsNumberFound = rider[key];
-        console.log(`✅ Found LSDBS_NUMBER as "${key}": ${lsdbsNumberFound}`);
         break;
       }
     }
@@ -110,11 +99,9 @@ export default function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber, onR
         if (match) {
           if (!lsbsIdFound) {
             lsbsIdFound = match[1];
-            console.log(`🔍 Found LSBS_ID pattern in ${key}: ${lsbsIdFound}`);
           }
           if (!lsdbsNumberFound) {
             lsdbsNumberFound = match[2];
-            console.log(`🔍 Found LSDBS_NUMBER pattern in ${key}: ${lsdbsNumberFound}`);
           }
         }
       }
@@ -122,16 +109,12 @@ export default function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber, onR
     
     // Jika masih tidak ditemukan, gunakan fallback
     if (!lsbsIdFound) {
-      console.log("⚠️ LSBS_ID not found, using fallback value from props");
       lsbsIdFound = lsbsId; // Gunakan dari props
     }
     
     if (!lsdbsNumberFound) {
-      console.log("⚠️ LSDBS_NUMBER not found, using fallback value");
       lsdbsNumberFound = lsdbsNumber || 1; // Gunakan dari props atau default
     }
-    
-    console.log(`📊 Final values: LSBS_ID=${lsbsIdFound}, LSDBS_NUMBER=${lsdbsNumberFound}`);
     
     // Buat data yang akan dikirim
     const riderDataToSend = {
@@ -151,7 +134,6 @@ export default function Rider({ isOpen, onClose, title, lsbsId, lsdbsNumber, onR
       }
     };
     
-    console.log("✅ Data to send:", riderDataToSend);
     
     // Tutup modal
     onClose();
